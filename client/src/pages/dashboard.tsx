@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import Sidebar from "@/components/sidebar";
-import Header from "@/components/header";
+import Header from "@/components/header"; 
 import StatsOverview from "@/components/stats-overview";
 import MarketTrendChart from "@/components/market-trend-chart";
 import WhaleActivity from "@/components/whale-activity";
