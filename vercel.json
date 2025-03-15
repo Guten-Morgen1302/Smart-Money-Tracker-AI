@@ -1,4 +1,3 @@
-
 {
   "version": 2,
   "buildCommand": "npm install --save-dev @types/bcrypt && npm run build",
@@ -20,6 +19,16 @@
     {
       "src": "/(.*)",
       "dest": "/client/index.html"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
