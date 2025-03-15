@@ -10,6 +10,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import MemoryStore from "memorystore";
 import { cryptoAgent } from './agent';
+import express from 'express';
 
 const MS_IN_24_HRS = 1000 * 60 * 60 * 24;
 const MemStoreSession = MemoryStore(session);
@@ -93,23 +94,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { username, password, email } = insertUserSchema.parse(req.body);
-      
+
       // Check if user already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already taken" });
       }
-      
+
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
-      
+
       // Create user
       const user = await storage.createUser({
         username,
         password: hashedPassword,
         email
       });
-      
+
       res.status(201).json({ message: "User created successfully" });
     } catch (err) {
       handleValidationError(err, res);
@@ -129,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/user", isAuthenticated, (req, res) => {
     res.json(req.user);
   });
-  
+
   // Wallet routes
   app.get("/api/wallets/top", async (req, res) => {
     try {
@@ -140,22 +141,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch wallets" });
     }
   });
-  
+
   app.get("/api/wallets/:address", async (req, res) => {
     try {
       const address = req.params.address;
       const wallet = await storage.getWalletByAddress(address);
-      
+
       if (!wallet) {
         return res.status(404).json({ message: "Wallet not found" });
       }
-      
+
       res.json(wallet);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch wallet" });
     }
   });
-  
+
   // Transaction routes
   app.get("/api/transactions", async (req, res) => {
     try {
@@ -165,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch transactions" });
     }
   });
-  
+
   app.get("/api/transactions/recent", async (req, res) => {
     try {
       const transactions = await storage.getRecentTransactions();
@@ -174,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch recent transactions" });
     }
   });
-  
+
   // AI Insights routes
   app.get("/api/ai-insights/recent", async (req, res) => {
     try {
@@ -184,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch AI insights" });
     }
   });
-  
+
   // Alerts routes
   app.get("/api/alerts", async (req, res) => {
     try {
@@ -196,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch alerts" });
     }
   });
-  
+
   app.post("/api/alerts", async (req, res) => {
     try {
       // For demo, set userId to 1
@@ -205,24 +206,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         userId
       });
-      
+
       const alert = await storage.createAlert(alertData);
       res.status(201).json(alert);
     } catch (err) {
       handleValidationError(err, res);
     }
   });
-  
+
   app.patch("/api/alerts/:id", async (req, res) => {
     try {
       const alertId = parseInt(req.params.id);
-      
+
       // Check if alert exists
       const alert = await storage.getAlertById(alertId);
       if (!alert) {
         return res.status(404).json({ message: "Alert not found" });
       }
-      
+
       // Update alert
       const updatedAlert = await storage.updateAlert(alertId, req.body);
       res.json(updatedAlert);
@@ -230,17 +231,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update alert" });
     }
   });
-  
+
   app.delete("/api/alerts/:id", async (req, res) => {
     try {
       const alertId = parseInt(req.params.id);
-      
+
       // Check if alert exists
       const alert = await storage.getAlertById(alertId);
       if (!alert) {
         return res.status(404).json({ message: "Alert not found" });
       }
-      
+
       // Delete alert
       await storage.deleteAlert(alertId);
       res.json({ message: "Alert deleted successfully" });
@@ -248,16 +249,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete alert" });
     }
   });
-  
+
+  // CORS and parsing middleware
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
+    // Handle preflight
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    next();
+  });
+
+  // Body parsing middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // Error handling for JSON parsing
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (err instanceof SyntaxError && 'body' in err) {
+      return res.status(400).send({ message: 'Invalid JSON' });
+    }
+    next();
+  });
+
+
   // AI Agent endpoint
-  app.post("/api/ai/query", express.json(), async (req, res) => {
+  app.all("/api/ai/query", async (req, res) => {
     try {
       const { query } = req.body;
-      
+
       if (!query) {
         return res.status(400).json({ message: "Query is required" });
       }
-      
+
       // Process the query with our agent
       const result = await cryptoAgent.process({
         messages: [
@@ -267,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         ]
       });
-      
+
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ 
