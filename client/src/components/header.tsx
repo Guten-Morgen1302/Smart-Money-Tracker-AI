@@ -242,35 +242,35 @@ export default function Header({ title, highlight }: HeaderProps) {
               <div className="grid grid-cols-5 gap-2">
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-cyan-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-cyan-400/20 flex items-center justify-center">
-                    <i className="ri-ethereum-line text-lg text-cyan-400"></i>
+                    <i className="ri-currency-line text-lg text-cyan-400"></i>
                   </div>
                   <span className="text-xs mt-1">ETH</span>
                 </div>
                 
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-orange-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-orange-400/20 flex items-center justify-center">
-                    <i className="ri-bitcoin-line text-lg text-orange-400"></i>
+                    <i className="ri-coin-line text-lg text-orange-400"></i>
                   </div>
                   <span className="text-xs mt-1">BTC</span>
                 </div>
                 
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-purple-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-purple-400/20 flex items-center justify-center">
-                    <i className="ri-sailing-boat-line text-lg text-purple-400"></i>
+                    <i className="ri-coins-line text-lg text-purple-400"></i>
                   </div>
                   <span className="text-xs mt-1">ADA</span>
                 </div>
                 
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-blue-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
-                    <i className="ri-copper-coin-line text-lg text-blue-400"></i>
+                    <i className="ri-bit-coin-line text-lg text-blue-400"></i>
                   </div>
                   <span className="text-xs mt-1">LTC</span>
                 </div>
                 
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-green-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-green-400/20 flex items-center justify-center">
-                    <i className="ri-sun-line text-lg text-green-400"></i>
+                    <i className="ri-money-dollar-circle-line text-lg text-green-400"></i>
                   </div>
                   <span className="text-xs mt-1">SOL</span>
                 </div>
