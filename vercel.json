@@ -1,15 +1,14 @@
 
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
+  "buildCommand": "npm install --save-dev @types/bcrypt && npm run build",
   "builds": [
     {
       "src": "server/index.ts",
       "use": "@vercel/node"
     },
     {
-      "src": "dist/public/**",
+      "src": "client/index.html",
       "use": "@vercel/static"
     }
   ],
@@ -19,11 +18,8 @@
       "dest": "/server/index.ts"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/dist/public/index.html"
+      "dest": "/client/index.html"
     }
   ]
 }
