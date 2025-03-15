@@ -9,6 +9,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import MemoryStore from "memorystore";
+import { cryptoAgent } from './agent';
 
 const MS_IN_24_HRS = 1000 * 60 * 60 * 24;
 const MemStoreSession = MemoryStore(session);
@@ -245,6 +246,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Alert deleted successfully" });
     } catch (err) {
       res.status(500).json({ message: "Failed to delete alert" });
+    }
+  });
+  
+  // AI Agent endpoint
+  app.post("/api/ai/query", async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+      
+      // Process the query with our agent
+      const result = await cryptoAgent.process({
+        messages: [
+          {
+            role: 'user',
+            content: query
+          }
+        ]
+      });
+      
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ 
+        message: "Failed to process AI query",
+        error: err.message 
+      });
     }
   });
 

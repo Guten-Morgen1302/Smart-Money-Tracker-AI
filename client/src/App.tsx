@@ -10,6 +10,7 @@ import WhaleTracker from "@/pages/whale-tracker";
 import AITrends from "@/pages/ai-trends";
 import WalletInsights from "@/pages/wallet-insights";
 import Alerts from "@/pages/alerts";
+import AIAssistant from "@/pages/ai-assistant";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
 

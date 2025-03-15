@@ -1,0 +1,265 @@
+Agent Starter SDK
+A starter project to help you get started building AI agents with the OpenServ SDK - a TypeScript framework that simplifies agent development. Whether you're new to AI development or an experienced developer, this guide will help you get started quickly.
+
+What You'll Learn
+Setting up your development environment
+
+Creating a basic AI agent using the OpenServ SDK
+
+Testing your agent locally with process() using OpenAI API
+
+Deploying your agent to the OpenServ platform
+
+Prerequisites
+Basic knowledge of JavaScript/TypeScript
+
+Node.js installed on your computer
+
+An OpenServ account (create one at platform.openserv.ai)
+
+(Optional) An OpenAI API key for local testing
+
+Getting Started
+1. Set Up Your Project
+First, clone this agent-starter template repository to get a pre-configured project:
+
+Copy
+git clone https://github.com/openserv-labs/agent-starter.git
+cd agent-starter
+npm install
+2. Configure Your Environment
+Copy the example environment file and update it with your credentials:
+
+Copy
+cp .env.example .env
+Edit the .env file to add:
+
+OPENSERV_API_KEY: Your OpenServ API key (required for platform integration)
+
+OPENAI_API_KEY: Your OpenAI API key (optional, for local testing)
+
+PORT: The port for your agent's server (default: 7378)
+
+3. Understand the Project Structure
+The agent-starter project has a minimal structure:
+
+Copy
+agent-starter/
+├── src/
+│   └── index.ts       # Your agent's core logic and server setup
+├── .env               # Environment variables
+├── package.json       # Project dependencies
+└── tsconfig.json      # TypeScript configuration
+This simple structure keeps everything in one file, making it easy to understand and modify.
+
+Understanding the Agent Code
+Let's examine the src/index.ts file to understand how an agent is defined with the SDK and how this works:
+
+Key Components of the Agent
+Agent Creation:
+
+Copy
+const agent = new Agent({
+  systemPrompt: 'You are an agent that sums two numbers'
+})
+This creates a new agent with a system prompt that guides its behavior.
+
+Adding Capabilities:
+
+Copy
+agent.addCapability({
+  name: 'sum',
+  description: 'Sums two numbers',
+  schema: z.object({
+    a: z.number(),
+    b: z.number()
+  }),
+  async run({ args }) {
+    return `${args.a} + ${args.b} = ${args.a + args.b}`
+  }
+})
+This defines a capability named sum that:
+
+Provides a description for the platform to understand when to use it
+
+Uses Zod schema for type safety and validation
+
+Implements the logic in the run function
+
+Starting the Server:
+
+Copy
+agent.start()
+This launches an HTTP server that handles requests from the OpenServ platform.
+
+Local Testing with process():
+
+Copy
+async function main() {
+  const sum = await agent.process({
+    messages: [
+      {
+        role: 'user',
+        content: 'add 13 and 29'
+      }
+    ]
+  })
+
+  console.log('Sum:', sum.choices[0].message.content)
+}
+This demonstrates how to test your agent locally without deploying it to the platform.
+
+Testing Locally with process()
+The process() method is a SDK feature that allows you to test your agent locally before deploying it to the OpenServ platform. This is especially useful during development to verify your agent works as expected.
+
+How process() Works
+When you call process():
+
+The SDK sends the user message to a LLM Large Language Model (using your OpenAI API key)
+
+The AI model determines if your agent's capabilities should be used
+
+If needed, it invokes your capabilities with the appropriate arguments
+
+It returns the response to you for testing
+
+Testing Complex Inputs and Edge Cases
+You can extend the local testing in main() to try different inputs:
+
+Copy
+async function main() {
+  // Test case 1: Simple addition
+  const test1 = await agent.process({
+    messages: [{ role: 'user', content: 'add 13 and 29' }]
+  })
+  console.log('Test 1:', test1.choices[0].message.content)
+  
+  // Test case 2: Different phrasing
+  const test2 = await agent.process({
+    messages: [{ role: 'user', content: 'what is the sum of 42 and 58?' }]
+  })
+  console.log('Test 2:', test2.choices[0].message.content)
+  
+  // Test case 3: Edge case
+  const test3 = await agent.process({
+    messages: [{ role: 'user', content: 'add negative five and seven' }]
+  })
+  console.log('Test 3:', test3.choices[0].message.content)
+}
+Exposing Your Local Server with Tunneling
+During development, OpenServ needs to reach your agent running on your computer. Since your development machine typically doesn't have a public internet address, we'll use a tunneling tool.
+
+What is Tunneling?
+Tunneling creates a temporary secure pathway from the internet to your local development environment, allowing OpenServ to send requests to your agent while you're developing it. Think of it as creating a secure "tunnel" from OpenServ to your local machine.
+
+Tunneling Options
+Choose a tunneling tool:
+
+ngrok (recommended for beginners)
+
+Easy setup with graphical and command-line interfaces
+
+Generous free tier with 1 concurrent connection
+
+Web interface to inspect requests
+
+localtunnel (open source option)
+
+Completely free and open source
+
+Simple command-line interface
+
+No account required
+
+Quick Setup with ngrok
+Download and install ngrok
+
+Open your terminal and run:
+
+Copy
+ngrok http 7378  # Use your actual port number if different
+Look for a line like Forwarding https://abc123.ngrok-free.app -> http://localhost:7378
+
+Copy the https URL (e.g., https://abc123.ngrok-free.app) - you'll need this for the next steps
+
+Integration with the OpenServ Platform
+The agent.start() function in your code starts the HTTP server that communicates with the OpenServ platform. When the platform sends a request to your agent:
+
+The server receives the request
+
+The SDK parses the request and determines which capability to use
+
+It executes the capability's run function
+
+It formats and returns the response to the platform
+
+Testing on the Platform
+To test your agent on the OpenServ platform:
+
+Start your local server:
+
+Copy
+npm run dev
+or
+
+Copy
+npm start
+Expose your server with a tunneling tool as described in the previous section
+
+Register your agent on the OpenServ platform:
+
+Go to Developer → Add Agent
+
+Enter your agent name and capabilities
+
+Set the Agent Endpoint to your tunneling tool URL
+
+Create a Secret Key and update your .env file
+
+Create a project on the platform:
+
+Projects → Create New Project
+
+Add your agent to the project
+
+Interact with your agent through the platform
+
+Advanced Capabilities
+As you get more comfortable with the SDK, you can leverage more advanced methods and features such as file operations, task management, user interaction via chat and messaging. Check the methods in the API Reference.
+
+Production Deployment
+When your agent is all set for production, it’s time to get it out there! Just deploy it to a hosting service so that it can be available 24/7 for users to enjoy.
+
+Build your project:
+
+Copy
+npm run build
+Deploy to a hosting service like (from simplest to most advanced):
+
+Serverless (Beginner-friendly)
+
+Vercel - Free tier available, easy deployment from GitHub
+
+Netlify Functions - Similar to Vercel with a generous free tier
+
+AWS Lambda - More complex but very scalable
+
+Container-based (More control)
+
+Render - Easy Docker deployment with free tier
+
+Railway - Developer-friendly platform
+
+Fly.io - Global deployment with generous free tier
+
+Open source self-hosted (Maximum freedom)
+
+OpenFaaS - Functions as a Service for Docker and Kubernetes
+
+Dokku - Lightweight PaaS you can install on any virtual machine
+
+Update your agent endpoint on the OpenServ platform with your production endpoint URL
+
+Submit for review through the Developer dashboard
+
+Happy building! We're excited to see what you will create with the OpenServ SDK.
