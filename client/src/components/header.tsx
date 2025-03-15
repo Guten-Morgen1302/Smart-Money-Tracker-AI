@@ -51,6 +51,12 @@ export default function Header({ title, highlight }: HeaderProps) {
     setShowAddressDialog(true);
   };
   
+  // Validate Ethereum address
+  const isValidEthereumAddress = (address: string): boolean => {
+    // Basic Ethereum address validation: 0x followed by exactly 40 hex characters
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  };
+  
   const connectWallet = () => {
     if (!customWalletAddress) {
       toast({
@@ -61,13 +67,21 @@ export default function Header({ title, highlight }: HeaderProps) {
       return;
     }
     
+    // Validate wallet address format
+    if (!isValidEthereumAddress(customWalletAddress)) {
+      toast({
+        title: "Invalid Wallet Address",
+        description: "Please enter a valid Ethereum address (0x followed by 40 characters)",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsConnecting(true);
     // Simulate wallet connection
     setTimeout(() => {
       // Format the address for display (first 6 chars + ... + last 4 chars)
-      const formattedAddress = customWalletAddress.length > 10 
-        ? `${customWalletAddress.substring(0, 6)}...${customWalletAddress.substring(customWalletAddress.length - 4)}`
-        : customWalletAddress;
+      const formattedAddress = `${customWalletAddress.substring(0, 6)}...${customWalletAddress.substring(customWalletAddress.length - 4)}`;
         
       setWalletAddress(formattedAddress);
       setWalletConnected(true);

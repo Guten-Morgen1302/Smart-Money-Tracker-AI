@@ -105,6 +105,17 @@ export default function AIAssistant() {
       <Header title="AI" highlight="Assistant" />
       
       <div className="flex-1 overflow-hidden flex flex-col mb-4">
+        <div className="mb-4">
+          <Button 
+            onClick={() => window.history.back()} 
+            variant="outline"
+            className="border-cyan-400/30 text-white hover:bg-white/5"
+          >
+            <i className="ri-arrow-left-line mr-2"></i>
+            Back to Dashboard
+          </Button>
+        </div>
+        
         <Card className="flex-1 bg-[#0A0A12] border-white/5 flex flex-col overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-lg">
