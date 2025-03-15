@@ -49,14 +49,7 @@ export default function Header({ title, highlight }: HeaderProps) {
     }
   ];
   
-  const [selectedWalletType, setSelectedWalletType] = useState<string | null>(null);
   const [customWalletAddress, setCustomWalletAddress] = useState("");
-  const [showAddressDialog, setShowAddressDialog] = useState(false);
-  
-  const initiateWalletConnection = (walletType: string) => {
-    setSelectedWalletType(walletType);
-    setShowAddressDialog(true);
-  };
   
   // Validate cryptocurrency addresses
   const detectWalletType = (address: string): WalletDetectionResult => {
@@ -123,7 +116,6 @@ export default function Header({ title, highlight }: HeaderProps) {
       setWalletAddress(formattedAddress);
       setWalletConnected(true);
       setIsConnecting(false);
-      setShowAddressDialog(false);
       setShowConnectDialog(false);
       
       toast({
@@ -239,94 +231,77 @@ export default function Header({ title, highlight }: HeaderProps) {
           <DialogHeader>
             <DialogTitle>Connect Your Wallet</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Connect your crypto wallet to access all features of Smart Money Tracker AI
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-cyan-400/20 hover:border-cyan-400/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={() => initiateWalletConnection("MetaMask")}
-            >
-              <div className="w-12 h-12 rounded-full bg-cyan-400/20 flex items-center justify-center mb-2">
-                <i className="ri-firefox-line text-2xl text-cyan-400"></i>
-              </div>
-              <span className="font-medium">MetaMask</span>
-            </div>
-            
-            <div
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-purple-500/20 hover:border-purple-500/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={() => initiateWalletConnection("Coinbase")}
-            >
-              <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
-                <i className="ri-compass-3-line text-2xl text-purple-500"></i>
-              </div>
-              <span className="font-medium">Coinbase</span>
-            </div>
-            
-            <div
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-pink-500/20 hover:border-pink-500/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={() => initiateWalletConnection("WalletConnect")}
-            >
-              <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center mb-2">
-                <i className="ri-treasure-map-line text-2xl text-pink-500"></i>
-              </div>
-              <span className="font-medium">WalletConnect</span>
-            </div>
-            
-            <div
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-green-400/20 hover:border-green-400/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={() => initiateWalletConnection("Trust Wallet")}
-            >
-              <div className="w-12 h-12 rounded-full bg-green-400/20 flex items-center justify-center mb-2">
-                <i className="ri-bit-coin-line text-2xl text-green-400"></i>
-              </div>
-              <span className="font-medium">Trust Wallet</span>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            {isConnecting ? (
-              <Button disabled className="bg-gradient-to-r from-cyan-400 to-purple-500 text-white">
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></div>
-                Connecting...
-              </Button>
-            ) : (
-              <Button 
-                variant="outline" 
-                onClick={() => setShowConnectDialog(false)}
-                className="border-cyan-400/30 text-white hover:bg-white/5"
-              >
-                Cancel
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Wallet Address Dialog */}
-      <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
-        <DialogContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
-          <DialogHeader>
-            <DialogTitle>{selectedWalletType} Wallet</DialogTitle>
-            <DialogDescription className="text-gray-400">
               Enter your wallet address to connect and track your assets
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            <label className="text-sm text-gray-300 mb-2 block">Wallet Address</label>
-            <Input 
-              type="text" 
-              placeholder="Enter any cryptocurrency wallet address" 
-              className="bg-[#0A0A10] border border-cyan-400/30 rounded-lg py-2 px-4 w-full text-white focus:outline-none focus:border-cyan-400/80 text-sm transition-all"
-              value={customWalletAddress}
-              onChange={(e) => setCustomWalletAddress(e.target.value)}
-            />
-            <p className="text-xs text-cyan-400/70 mt-2">
-              <i className="ri-information-line mr-1"></i>
-              Your wallet address will be used to track your assets and provide personalized insights
-            </p>
+            <div className="flex flex-col space-y-4">
+              {/* Supported wallet types */}
+              <p className="text-sm text-cyan-400/80">Supported cryptocurrencies:</p>
+              <div className="grid grid-cols-5 gap-2">
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-cyan-400/20 bg-[#0A0A10]/70">
+                  <div className="w-8 h-8 rounded-full bg-cyan-400/20 flex items-center justify-center">
+                    <i className="ri-ethereum-line text-lg text-cyan-400"></i>
+                  </div>
+                  <span className="text-xs mt-1">ETH</span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-orange-400/20 bg-[#0A0A10]/70">
+                  <div className="w-8 h-8 rounded-full bg-orange-400/20 flex items-center justify-center">
+                    <i className="ri-bitcoin-line text-lg text-orange-400"></i>
+                  </div>
+                  <span className="text-xs mt-1">BTC</span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-purple-400/20 bg-[#0A0A10]/70">
+                  <div className="w-8 h-8 rounded-full bg-purple-400/20 flex items-center justify-center">
+                    <i className="ri-sailing-boat-line text-lg text-purple-400"></i>
+                  </div>
+                  <span className="text-xs mt-1">ADA</span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-blue-400/20 bg-[#0A0A10]/70">
+                  <div className="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
+                    <i className="ri-copper-coin-line text-lg text-blue-400"></i>
+                  </div>
+                  <span className="text-xs mt-1">LTC</span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-green-400/20 bg-[#0A0A10]/70">
+                  <div className="w-8 h-8 rounded-full bg-green-400/20 flex items-center justify-center">
+                    <i className="ri-sun-line text-lg text-green-400"></i>
+                  </div>
+                  <span className="text-xs mt-1">SOL</span>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <label className="text-sm text-gray-300 mb-2 block">Wallet Address</label>
+                <Input 
+                  type="text" 
+                  placeholder="Enter any cryptocurrency wallet address" 
+                  className="bg-[#0A0A10] border border-cyan-400/30 rounded-lg py-2 px-4 w-full text-white focus:outline-none focus:border-cyan-400/80 text-sm transition-all"
+                  value={customWalletAddress}
+                  onChange={(e) => setCustomWalletAddress(e.target.value)}
+                />
+                <p className="text-xs text-cyan-400/70 mt-2">
+                  <i className="ri-information-line mr-1"></i>
+                  We'll automatically detect the wallet type from your address
+                </p>
+              </div>
+              
+              <div className="bg-[#0A0A10] rounded-lg p-3 border border-white/5">
+                <h4 className="text-sm font-medium text-gray-300 mb-1">Supported Wallet Types:</h4>
+                <ul className="text-xs text-gray-400 space-y-1">
+                  <li><i className="ri-checkbox-circle-line text-cyan-400 mr-1"></i> Ethereum (ETH): starts with 0x...</li>
+                  <li><i className="ri-checkbox-circle-line text-cyan-400 mr-1"></i> Bitcoin (BTC): starts with 1, 3, or bc1...</li>
+                  <li><i className="ri-checkbox-circle-line text-cyan-400 mr-1"></i> Litecoin (LTC): starts with L or M...</li>
+                  <li><i className="ri-checkbox-circle-line text-cyan-400 mr-1"></i> Cardano (ADA): starts with addr1...</li>
+                  <li><i className="ri-checkbox-circle-line text-cyan-400 mr-1"></i> Solana (SOL): 32-44 alphanumeric characters</li>
+                </ul>
+              </div>
+            </div>
           </div>
           
           <DialogFooter>
@@ -340,7 +315,7 @@ export default function Header({ title, highlight }: HeaderProps) {
                 <Button 
                   variant="outline" 
                   onClick={() => {
-                    setShowAddressDialog(false);
+                    setShowConnectDialog(false);
                     setCustomWalletAddress("");
                   }}
                   className="border-cyan-400/30 text-white hover:bg-white/5 mr-2"
