@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Generate random activity data for mini charts
-export function generateActivityData(type: string): number[] {
+export function generateActivityData(type: string): number[] { 
   // Different patterns based on wallet type
   if (type === "Smart Money") {
     return [3, 4, 5, 4, 6, 7, 8, 7, 9, 8, 10, 11, 12];
