@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { apiRequest } from '@/lib/api';
 
@@ -35,7 +35,7 @@ export default function Login() {
 
       toast({
         title: "Login Successful",
-        description: "Welcome to Smart Money Tracker AI",
+        description: "Welcome back, Harsh Patil",
         variant: "default"
       });
 
