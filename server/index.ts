@@ -1,82 +1,82 @@
-// index.ts
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";  // Importing the registerRoutes function
-import { setupVite, serveStatic, log } from "./vite";  // These are for Vite setup, assuming you use Vite in development
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// CORS middleware (allows cross-origin requests for all origins)
+// CORS middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');  // Allow requests from all origins
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');  // Allow various HTTP methods
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');  // Allow content-type and authorization headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);  // Respond to OPTIONS requests with a 200 status
+    return res.sendStatus(200);
   }
   next();
 });
 
-// Middleware to parse JSON bodies and URL-encoded data
-app.use(express.json());  // Handles JSON payloads
-app.use(express.urlencoded({ extended: false }));  // Parses URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// Logging middleware to log API calls with duration
 app.use((req, res, next) => {
-  const start = Date.now();  // Track the start time of the request
+  const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;  // Capture the JSON response
-    return originalResJson.apply(res, [bodyJson, ...args]);  // Send the response
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;  // Calculate request duration
-    if (path.startsWith("/api")) {  // Log only API calls
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
-      // Ensure the log line doesn't exceed 80 characters
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);  // Log the request details
+      log(logLine);
     }
   });
 
-  next();  // Proceed to the next middleware
+  next();
 });
 
-// Register API routes (this will add all the routes from routes.ts)
-registerRoutes(app);
+(async () => {
+  const server = await registerRoutes(app);
 
-// Error handling middleware - catches any errors and sends an appropriate response
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
 
-  res.status(status).json({ message });
-  throw err;  // Re-throw the error for logging purposes
-});
+    res.status(status).json({ message });
+    throw err;
+  });
 
-// Setup Vite for development or static files for production
-if (app.get("env") === "development") {
-  setupVite(app);  // Use Vite's dev server in development
-} else {
-  serveStatic(app);  // Serve static files in production
-}
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
 
-// Start the server on port 5000
-const port = 5000;
-app.listen({
-  port,
-  host: "0.0.0.0",  // Listen on all interfaces
-  reusePort: true,  // Allow port reuse
-}, () => {
-  log(`Server is running on port ${port}`);
-});
+  // ALWAYS serve the app on port 5000
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = 5000;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
