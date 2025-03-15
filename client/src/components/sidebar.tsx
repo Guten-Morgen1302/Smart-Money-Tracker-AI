@@ -98,10 +98,10 @@ export default function Sidebar() {
         <div className="mt-auto mb-4 px-2">
           <div className="hidden lg:flex items-center p-3 rounded-lg bg-[#0A0A10]/50 glow-border">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 flex items-center justify-center">
-              <span className="text-xs font-bold">JP</span>
+              <span className="text-xs font-bold">HP</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium">John Doe</p>
+              <p className="text-sm font-medium">Harsh Patil</p>
               <p className="text-xs text-gray-400">Pro Member</p>
             </div>
             <button className="ml-auto text-gray-400 hover:text-white">
