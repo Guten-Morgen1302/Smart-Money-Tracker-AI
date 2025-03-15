@@ -3,7 +3,7 @@ import Sidebar from "@/components/sidebar";
 import Header from "@/components/header";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import MarketTrendChart from "@/components/market-trend-chart";
-import AIInsights from "@/components/ai-insights";
+import AIInsights from "@/components/ai-insights"; 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AITrends() {
