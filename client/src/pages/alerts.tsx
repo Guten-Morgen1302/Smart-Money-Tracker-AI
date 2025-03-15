@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertCircle, Edit, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Bell, Edit, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 type Alert = {
   id: number;
@@ -36,7 +37,19 @@ export default function Alerts() {
   
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [newAlert, setNewAlert] = useState({
+    title: "",
+    condition: "",
+    active: true,
+    thresholdAmount: "",
+    thresholdCurrency: "BTC",
+    walletAddress: "",
+    alertType: "transaction"
+  });
+  const [editAlert, setEditAlert] = useState({
+    id: 0,
     title: "",
     condition: "",
     active: true,
@@ -145,6 +158,83 @@ export default function Alerts() {
         variant: "destructive"
       });
     }
+  };
+  
+  const handleEditAlert = async () => {
+    try {
+      let condition = "";
+      
+      if (editAlert.alertType === "transaction") {
+        condition = `Transaction amount > ${editAlert.thresholdAmount} ${editAlert.thresholdCurrency}`;
+      } else if (editAlert.alertType === "wallet") {
+        condition = `Wallet ${editAlert.walletAddress} transactions`;
+      }
+      
+      const alertData = {
+        title: editAlert.title,
+        condition,
+        active: editAlert.active
+      };
+      
+      await apiRequest("PATCH", `/api/alerts/${editAlert.id}`, alertData);
+      
+      // Reset form and close dialog
+      setEditDialogOpen(false);
+      setSelectedAlert(null);
+      
+      // Invalidate cache to refresh alerts
+      queryClient.invalidateQueries({ queryKey: ['/api/alerts'] });
+      
+      toast({
+        title: "Alert updated",
+        description: "Your alert has been updated successfully",
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update alert. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const openEditDialog = (alert: Alert) => {
+    setSelectedAlert(alert);
+    
+    // Parse the condition to set the form fields
+    let alertType = "transaction";
+    let thresholdAmount = "";
+    let thresholdCurrency = "BTC";
+    let walletAddress = "";
+    
+    if (alert.condition.includes("Transaction amount >")) {
+      alertType = "transaction";
+      const match = alert.condition.match(/Transaction amount > (\d+) (\w+)/);
+      if (match) {
+        thresholdAmount = match[1];
+        thresholdCurrency = match[2];
+      }
+    } else if (alert.condition.includes("Wallet")) {
+      alertType = "wallet";
+      const match = alert.condition.match(/Wallet ([\w.]+) transactions/);
+      if (match) {
+        walletAddress = match[1];
+      }
+    }
+    
+    setEditAlert({
+      id: alert.id,
+      title: alert.title,
+      condition: alert.condition,
+      active: alert.active,
+      thresholdAmount,
+      thresholdCurrency,
+      walletAddress,
+      alertType
+    });
+    
+    setEditDialogOpen(true);
   };
   
   const deleteAlert = async (id: number) => {
@@ -348,6 +438,108 @@ export default function Alerts() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              
+              {/* Edit Dialog */}
+              <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <DialogContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
+                  <DialogHeader>
+                    <DialogTitle>Edit Alert</DialogTitle>
+                    <DialogDescription className="text-gray-400">
+                      Update your alert settings
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-title">Alert Name</Label>
+                      <Input 
+                        id="edit-title" 
+                        value={editAlert.title} 
+                        onChange={(e) => setEditAlert({...editAlert, title: e.target.value})}
+                        placeholder="E.g., Large BTC Transfers" 
+                        className="bg-[#0A0A10]/70 border-cyan-400/30 focus:border-cyan-400/80"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Alert Type</Label>
+                      <Select 
+                        value={editAlert.alertType} 
+                        onValueChange={(value) => setEditAlert({...editAlert, alertType: value})}
+                      >
+                        <SelectTrigger className="bg-[#0A0A10]/70 border-cyan-400/30 focus:border-cyan-400/80">
+                          <SelectValue placeholder="Select alert type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
+                          <SelectItem value="transaction">Transaction Amount</SelectItem>
+                          <SelectItem value="wallet">Wallet Activity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {editAlert.alertType === "transaction" ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-thresholdAmount">Threshold Amount</Label>
+                          <Input 
+                            id="edit-thresholdAmount" 
+                            value={editAlert.thresholdAmount} 
+                            onChange={(e) => setEditAlert({...editAlert, thresholdAmount: e.target.value})}
+                            placeholder="100" 
+                            className="bg-[#0A0A10]/70 border-cyan-400/30 focus:border-cyan-400/80"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-thresholdCurrency">Currency</Label>
+                          <Select 
+                            value={editAlert.thresholdCurrency} 
+                            onValueChange={(value) => setEditAlert({...editAlert, thresholdCurrency: value})}
+                          >
+                            <SelectTrigger className="bg-[#0A0A10]/70 border-cyan-400/30 focus:border-cyan-400/80">
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
+                              <SelectItem value="BTC">BTC</SelectItem>
+                              <SelectItem value="ETH">ETH</SelectItem>
+                              <SelectItem value="SOL">SOL</SelectItem>
+                              <SelectItem value="USDC">USDC</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-walletAddress">Wallet Address</Label>
+                        <Input 
+                          id="edit-walletAddress" 
+                          value={editAlert.walletAddress} 
+                          onChange={(e) => setEditAlert({...editAlert, walletAddress: e.target.value})}
+                          placeholder="0x..." 
+                          className="bg-[#0A0A10]/70 border-cyan-400/30 focus:border-cyan-400/80"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-2">
+                      <Switch 
+                        id="edit-active" 
+                        checked={editAlert.active} 
+                        onCheckedChange={(checked) => setEditAlert({...editAlert, active: checked})}
+                      />
+                      <Label htmlFor="edit-active">Enable Alert</Label>
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="border-cyan-400/30 text-white hover:bg-white/5">
+                      Cancel
+                    </Button>
+                    <Button onClick={handleEditAlert} className="bg-gradient-to-r from-cyan-400 to-purple-500 text-white">
+                      Update Alert
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
@@ -386,7 +578,12 @@ export default function Alerts() {
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-cyan-400 hover:bg-white/5">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-cyan-400 hover:bg-white/5"
+                              onClick={() => openEditDialog(alert)}
+                            >
                               <Edit className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
                             </Button>
