@@ -8,11 +8,11 @@ class Agent {
   private capabilities: any[] = [];
   private openai: OpenAI | null = null;
   private openservApiKey: string | undefined;
-  
+
   constructor({ systemPrompt }: { systemPrompt: string }) {
     this.systemPrompt = systemPrompt;
     this.openservApiKey = process.env.OPENSERV_API_KEY;
-    
+
     // Initialize OpenAI if API key is available
     if (process.env.OPENAI_API_KEY) {
       this.openai = new OpenAI({
@@ -42,7 +42,7 @@ class Agent {
 
     try {
       const userMessage = messages.find(m => m.role === 'user')?.content || '';
-      
+
       // Use OpenServ SDK if available
       if (this.openservApiKey) {
         try {
@@ -51,11 +51,11 @@ class Agent {
             if (this.shouldUseCapability(userMessage, capability)) {
               // Use OpenServ SDK to process the capability
               const args = this.extractArgs(userMessage, capability);
-              
+
               // In a production environment, this would use the OpenServ SDK
               // For now, we'll just call our capabilities directly
               const result = await capability.run({ args });
-              
+
               return {
                 choices: [
                   {
@@ -73,14 +73,14 @@ class Agent {
           // Fall back to standard capabilities if OpenServ fails
         }
       }
-      
+
       // Use standard capabilities if OpenServ is not available or failed
       for (const capability of this.capabilities) {
         if (this.shouldUseCapability(userMessage, capability)) {
           try {
             const args = this.extractArgs(userMessage, capability);
             const result = await capability.run({ args });
-            
+
             return {
               choices: [
                 {
@@ -115,7 +115,7 @@ class Agent {
             ...messages
           ]
         });
-        
+
         return {
           choices: response.choices
         };
@@ -134,12 +134,28 @@ class Agent {
       };
     } catch (error: any) {
       console.error("Error processing agent request:", error);
+
+      // Handle rate limit errors specifically
+      if (error?.status === 429) {
+        return {
+          choices: [
+            {
+              message: {
+                role: 'assistant',
+                content: `I'm currently experiencing high traffic. In the meantime, I can help you with:\n- Market trends\n- Wallet information\n- Transaction history\n- AI insights\n\nPlease try one of these topics!`
+              }
+            }
+          ]
+        };
+      }
+
+      // Generic error fallback
       return {
         choices: [
           {
             message: {
               role: 'assistant',
-              content: `I encountered an error while processing your request. Please try again or ask a different question.`
+              content: `I'm having trouble accessing some of my capabilities right now. You can still ask me about market trends, wallet information, or view recent transactions.`
             }
           }
         ]
@@ -149,7 +165,7 @@ class Agent {
 
   private shouldUseCapability(userMessage: string, capability: any): boolean {
     const message = userMessage.toLowerCase();
-    
+
     switch (capability.name) {
       case 'getMarketTrends':
         return message.includes('market') || 
@@ -177,7 +193,7 @@ class Agent {
   private extractArgs(userMessage: string, capability: any): any {
     // This is a simplified implementation - in a real agent this would be done by the LLM
     const message = userMessage.toLowerCase();
-    
+
     switch (capability.name) {
       case 'getWalletInfo': {
         // Basic regex to extract wallet addresses (0x followed by alphanumeric)
@@ -228,7 +244,7 @@ cryptoAgent.addCapability({
   async run({ args }: any) {
     // Mock data - in real implementation this would use real market data
     const trendDescription = "Bitcoin has shown a 5% increase over the last 24 hours, with Ethereum following at 3.2%. The overall market sentiment is bullish based on on-chain metrics, with accumulation patterns visible among whale wallets. Trading volume has increased by 12% across major exchanges.";
-    
+
     return `Market Trend Analysis:\n${trendDescription}`;
   }
 });
@@ -244,14 +260,14 @@ cryptoAgent.addCapability({
       if (!args.address) {
         return "Please provide a wallet address to analyze.";
       }
-      
+
       // Get wallet from storage
       const wallet = await storage.getWalletByAddress(args.address);
-      
+
       if (!wallet) {
         return `No information found for wallet address ${args.address}. This address may not be tracked in our system or may be incorrect.`;
       }
-      
+
       return `
 Wallet Analysis for ${args.address}:
 Type: ${wallet.type}
@@ -278,20 +294,20 @@ cryptoAgent.addCapability({
     try {
       const limit = args.limit || 3;
       const transactions = await storage.getRecentTransactions(limit);
-      
+
       if (!transactions.length) {
         return "No recent transactions found.";
       }
-      
+
       let response = `Recent Transactions (${transactions.length}):\n\n`;
-      
+
       transactions.forEach((tx, i) => {
         response += `${i+1}. ${tx.type}: ${tx.amount} ${tx.asset}\n`;
         response += `   From: ${tx.fromAddress} → To: ${tx.toAddress}\n`;
         response += `   Category: ${tx.category} | Risk Score: ${tx.riskScore}/10\n`;
         response += `   Time: ${tx.timestamp}\n\n`;
       });
-      
+
       return response;
     } catch (error: any) {
       return `Error retrieving transaction information: ${error.message}`;
@@ -313,19 +329,19 @@ cryptoAgent.addCapability({
   async run({ args }: any) {
     try {
       const insights = await storage.getRecentAIInsights(5);
-      
+
       if (!insights.length) {
         return "No AI insights available at this time.";
       }
-      
+
       let response = "AI-Powered Crypto Insights:\n\n";
-      
+
       insights.forEach((insight, i) => {
         response += `${i+1}. ${insight.title}\n`;
         response += `   ${insight.description}\n`;
         response += `   Confidence: ${insight.confidence}% | Category: ${insight.category}\n\n`;
       });
-      
+
       return response;
     } catch (error: any) {
       return `Error retrieving AI insights: ${error.message}`;
