@@ -12,7 +12,7 @@ type Message = {
   timestamp: Date;
 };
 
-export default function AIAssistant() {
+export function AIAssistant() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
