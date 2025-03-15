@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiRequest } from '@/lib/queryClient'; 
+import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,7 +58,17 @@ export default function AIAssistant() {
         }
       });
       
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}`);
+      }
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Invalid JSON response from server');
+      }
       
       // Add AI response to chat
       if (data && data.choices && data.choices[0]) {
