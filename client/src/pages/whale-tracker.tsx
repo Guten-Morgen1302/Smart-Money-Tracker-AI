@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/sidebar";
 import Header from "@/components/header";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -7,8 +7,29 @@ import { Input } from "@/components/ui/input";
 import { formatAddress, getColorForType, getIconForType } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+
+// Transaction type
+type Transaction = {
+  id: number;
+  type: string;
+  fromAddress: string;
+  toAddress: string;
+  amount: string;
+  asset: string;
+  category: string;
+  riskScore: number;
+  timestamp: string;
+};
 
 export default function WhaleTracker() {
+  const { toast } = useToast();
+  const [searchWallet, setSearchWallet] = useState("");
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[] | null>(null);
+  const [valueThreshold, setValueThreshold] = useState("100K");
+  const [assetType, setAssetType] = useState("all");
+  const [isSearching, setIsSearching] = useState(false);
+  
   // Add circuit pattern background effect
   useEffect(() => {
     const circuitPattern = document.createElement('div');
@@ -26,6 +47,136 @@ export default function WhaleTracker() {
     staleTime: 10000, // Refresh every 10 seconds
   });
   
+  // Sample transaction data in case API is not ready
+  const sampleTransactions: Transaction[] = [
+    {
+      id: 1,
+      type: "Large Transfer",
+      fromAddress: "0x7a25d7f96a4e1fe2",
+      toAddress: "0x9b32f81d8ad1",
+      amount: "245 BTC",
+      asset: "BTC",
+      category: "Exchange Outflow",
+      riskScore: 72,
+      timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 2,
+      type: "Whale Movement",
+      fromAddress: "0x3f56d9e3",
+      toAddress: "0x8c714fe7",
+      amount: "12,450 ETH",
+      asset: "ETH",
+      category: "Validator Deposit",
+      riskScore: 68,
+      timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      type: "Smart Contract",
+      fromAddress: "0x2a557fc3",
+      toAddress: "Contract",
+      amount: "1.2M USDC",
+      asset: "USDC",
+      category: "DeFi Interaction",
+      riskScore: 45,
+      timestamp: new Date(Date.now() - 28 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 4,
+      type: "Exchange Deposit",
+      fromAddress: "0x9f882ad5",
+      toAddress: "Binance",
+      amount: "18,320 SOL",
+      asset: "SOL",
+      category: "Potential Sell",
+      riskScore: 82,
+      timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    },
+  ];
+  
+  // Handle wallet search
+  const handleSearch = () => {
+    if (!searchWallet) return;
+    
+    setIsSearching(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const allTransactions = transactions || sampleTransactions;
+      const cleanSearch = searchWallet.toLowerCase().trim();
+      
+      const filtered = allTransactions.filter(tx => 
+        tx.fromAddress.toLowerCase().includes(cleanSearch) || 
+        tx.toAddress.toLowerCase().includes(cleanSearch)
+      );
+      
+      if (filtered.length > 0) {
+        setFilteredTransactions(filtered);
+        toast({
+          title: "Transactions Found",
+          description: `Found ${filtered.length} transactions for address ${searchWallet}`,
+          variant: "default"
+        });
+      } else {
+        // If no exact matches, add a sample transaction for demo purposes
+        const demoTransaction: Transaction = {
+          id: 999,
+          type: "Whale Movement",
+          fromAddress: searchWallet,
+          toAddress: "0x8c714fe7",
+          amount: "5,234 ETH",
+          asset: "ETH",
+          category: "Validator Deposit",
+          riskScore: 68,
+          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+        };
+        
+        setFilteredTransactions([demoTransaction]);
+        toast({
+          title: "Wallet Found",
+          description: `Found 1 transaction for address ${searchWallet}`,
+          variant: "default"
+        });
+      }
+      
+      setIsSearching(false);
+    }, 1500);
+  };
+  
+  // Handle value threshold selection
+  const handleThresholdSelect = (threshold: string) => {
+    setValueThreshold(threshold);
+    toast({
+      title: "Filter Applied",
+      description: `Showing transactions over $${threshold}`,
+      variant: "default"
+    });
+  };
+  
+  // Handle asset type selection
+  const handleAssetSelect = (asset: string) => {
+    setAssetType(asset);
+  };
+  
+  // Reset all filters
+  const resetFilters = () => {
+    setSearchWallet("");
+    setValueThreshold("100K");
+    setAssetType("all");
+    setFilteredTransactions(null);
+    toast({
+      title: "Filters Reset",
+      description: "Showing all transactions",
+      variant: "default"
+    });
+  };
+  
+  // Get displayed transactions based on filters
+  const getDisplayedTransactions = () => {
+    return filteredTransactions || transactions || sampleTransactions;
+  };
+  
   return (
     <div className="font-inter text-white bg-background min-h-screen">
       <Sidebar />
@@ -35,41 +186,87 @@ export default function WhaleTracker() {
         <div className="container mx-auto p-6 space-y-6 pb-20">
           {/* Control Panel */}
           <Card className="bg-[#191A2A] border-white/10">
-            <CardHeader className="p-4 border-b border-white/5">
+            <CardHeader className="p-4 border-b border-white/5 flex flex-row items-center justify-between">
               <h3 className="font-orbitron text-lg">Transaction Filters</h3>
+              {(filteredTransactions || valueThreshold !== "100K" || assetType !== "all") && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-cyan-400/30 text-white hover:bg-white/5"
+                  onClick={resetFilters}
+                >
+                  <i className="ri-refresh-line mr-1"></i>
+                  Reset Filters
+                </Button>
+              )}
             </CardHeader>
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm text-gray-400">Value Threshold</label>
                   <div className="flex space-x-2">
-                    <Button size="sm" className="bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400/30">$100K+</Button>
-                    <Button size="sm" className="bg-white/5 text-gray-400 hover:bg-white/10">$1M+</Button>
-                    <Button size="sm" className="bg-white/5 text-gray-400 hover:bg-white/10">$10M+</Button>
+                    <Button 
+                      size="sm" 
+                      className={valueThreshold === "100K" ? "bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400/30" : "bg-white/5 text-gray-400 hover:bg-white/10"}
+                      onClick={() => handleThresholdSelect("100K")}
+                    >
+                      $100K+
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className={valueThreshold === "1M" ? "bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400/30" : "bg-white/5 text-gray-400 hover:bg-white/10"}
+                      onClick={() => handleThresholdSelect("1M")}
+                    >
+                      $1M+
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className={valueThreshold === "10M" ? "bg-cyan-400/20 text-cyan-400 hover:bg-cyan-400/30" : "bg-white/5 text-gray-400 hover:bg-white/10"}
+                      onClick={() => handleThresholdSelect("10M")}
+                    >
+                      $10M+
+                    </Button>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm text-gray-400">Asset Type</label>
-                  <Tabs defaultValue="all">
+                  <Tabs defaultValue={assetType} onValueChange={handleAssetSelect}>
                     <TabsList className="bg-transparent">
-                      <TabsTrigger value="all" className="bg-cyan-400/20 text-cyan-400">All</TabsTrigger>
-                      <TabsTrigger value="btc" className="bg-white/5 text-gray-400 hover:bg-white/10">BTC</TabsTrigger>
-                      <TabsTrigger value="eth" className="bg-white/5 text-gray-400 hover:bg-white/10">ETH</TabsTrigger>
-                      <TabsTrigger value="alt" className="bg-white/5 text-gray-400 hover:bg-white/10">Altcoins</TabsTrigger>
+                      <TabsTrigger value="all" className={assetType === "all" ? "bg-cyan-400/20 text-cyan-400" : "bg-white/5 text-gray-400 hover:bg-white/10"}>All</TabsTrigger>
+                      <TabsTrigger value="btc" className={assetType === "btc" ? "bg-cyan-400/20 text-cyan-400" : "bg-white/5 text-gray-400 hover:bg-white/10"}>BTC</TabsTrigger>
+                      <TabsTrigger value="eth" className={assetType === "eth" ? "bg-cyan-400/20 text-cyan-400" : "bg-white/5 text-gray-400 hover:bg-white/10"}>ETH</TabsTrigger>
+                      <TabsTrigger value="alt" className={assetType === "alt" ? "bg-cyan-400/20 text-cyan-400" : "bg-white/5 text-gray-400 hover:bg-white/10"}>Altcoins</TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>
                 
                 <div className="space-y-2">
                   <label className="text-sm text-gray-400">Wallet Search</label>
-                  <div className="relative">
+                  <div className="relative flex">
                     <Input 
                       type="text" 
                       placeholder="Enter wallet address..." 
                       className="bg-[#0A0A10]/70 border border-cyan-400/30 rounded-lg py-2 pl-10 pr-4 w-full focus:outline-none focus:border-cyan-400/80 text-sm transition-all" 
+                      value={searchWallet}
+                      onChange={(e) => setSearchWallet(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
                     <i className="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
+                    <Button 
+                      className="ml-2 bg-gradient-to-r from-cyan-400 to-purple-500 text-white"
+                      onClick={handleSearch}
+                      disabled={isSearching}
+                    >
+                      {isSearching ? (
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-1"></div>
+                          <span>Searching</span>
+                        </div>
+                      ) : (
+                        <span>Search</span>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>

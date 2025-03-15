@@ -7,6 +7,20 @@ import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { formatAddress, getColorForType } from "@/lib/utils";
 import TopWallets from "@/components/top-wallets";
+import { useToast } from "@/hooks/use-toast";
+import WalletMiniChart from "@/components/wallet-mini-chart";
+
+// Define wallet type
+type Wallet = {
+  id: number;
+  address: string;
+  type: string;
+  balance: string;
+  monthChange: string;
+  riskScore: number;
+  aiRating: string;
+  activityData: number[];
+};
 
 export default function WalletInsights() {
   // Add circuit pattern background effect
@@ -20,14 +34,148 @@ export default function WalletInsights() {
     };
   }, []);
   
+  const { toast } = useToast();
   const [searchAddress, setSearchAddress] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [walletData, setWalletData] = useState<Wallet | null>(null);
   
-  // Search wallet - would be connected to API
-  const handleSearch = () => {
-    if (searchAddress) {
-      setHasSearched(true);
+  // Sample tokens for demo
+  const tokens = [
+    {
+      symbol: "BTC",
+      name: "Bitcoin",
+      amount: "1,245 BTC",
+      value: "$60.2M",
+      percentage: 42,
+      color: "cyan"
+    },
+    {
+      symbol: "ETH",
+      name: "Ethereum",
+      amount: "18,320 ETH",
+      value: "$52.5M",
+      percentage: 36,
+      color: "purple" 
+    },
+    {
+      symbol: "SOL",
+      name: "Solana",
+      amount: "241,500 SOL",
+      value: "$32.1M",
+      percentage: 22,
+      color: "green"
     }
+  ];
+  
+  // Sample transactions for demo
+  const transactions = [
+    {
+      type: "Buy",
+      typeColor: "cyan",
+      amount: "120 BTC",
+      time: "2 hours ago",
+      insight: "Accumulation during market dip",
+      insightColor: "green"
+    },
+    {
+      type: "Swap",
+      typeColor: "purple",
+      amount: "5,000 ETH → 150,000 SOL",
+      time: "1 day ago",
+      insight: "Rotating to stronger performing asset",
+      insightColor: "cyan"
+    },
+    {
+      type: "Sell",
+      typeColor: "pink",
+      amount: "20,000 LINK",
+      time: "3 days ago",
+      insight: "Taking profits at local top",
+      insightColor: "pink"
+    }
+  ];
+  
+  // Search wallet using API or local storage
+  const handleSearch = () => {
+    if (!searchAddress) return;
+    
+    setIsSearching(true);
+    setHasSearched(false);
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      // Example showing how you might use real API once implemented
+      // For now, we just simulate a wallet lookup
+      let foundWallet: Wallet | null = null;
+      
+      // Clean up the address and allow partial searches for demo
+      const cleanAddress = searchAddress.toLowerCase().trim();
+      
+      // Sample data for demo purposes
+      const wallets = [
+        {
+          id: 1,
+          address: "0x7a250d5",
+          type: "Smart Money",
+          balance: "$145.2M",
+          monthChange: "+12.5% MoM",
+          riskScore: 82,
+          aiRating: "Bullish",
+          activityData: [3, 4, 5, 4, 6, 7, 8, 7, 9, 8, 10, 11, 12]
+        },
+        {
+          id: 2,
+          address: "0x9b32f81d",
+          type: "Institution",
+          balance: "$278.5M",
+          monthChange: "+8.2% MoM",
+          riskScore: 75,
+          aiRating: "Bullish",
+          activityData: [8, 7, 6, 8, 9, 8, 9, 10, 11, 10, 9, 10, 11]
+        }
+      ];
+      
+      // Find wallet that includes the search string
+      for (const wallet of wallets) {
+        if (wallet.address.toLowerCase().includes(cleanAddress)) {
+          foundWallet = wallet;
+          break;
+        }
+      }
+      
+      // Use the input address if no match is found (for demo purposes)
+      if (!foundWallet && cleanAddress) {
+        foundWallet = {
+          id: 999,
+          address: searchAddress,
+          type: "Smart Money",
+          balance: "$145.2M",
+          monthChange: "+12.5% MoM",
+          riskScore: 82,
+          aiRating: "Bullish",
+          activityData: [3, 4, 5, 4, 6, 7, 8, 7, 9, 8, 10, 11, 12]
+        };
+      }
+      
+      if (foundWallet) {
+        setWalletData(foundWallet);
+        setHasSearched(true);
+        toast({
+          title: "Wallet Found",
+          description: `Successfully retrieved data for ${formatAddress(foundWallet.address)}`,
+          variant: "default"
+        });
+      } else {
+        toast({
+          title: "Wallet Not Found",
+          description: "No data found for the provided address",
+          variant: "destructive"
+        });
+      }
+      
+      setIsSearching(false);
+    }, 1500);
   };
   
   return (
@@ -57,6 +205,7 @@ export default function WalletInsights() {
                   <Button 
                     className="absolute right-2 top-1.5 bg-gradient-to-r from-cyan-400 to-purple-500 text-white"
                     onClick={handleSearch}
+                    disabled={isSearching}
                   >
                     Analyze
                   </Button>

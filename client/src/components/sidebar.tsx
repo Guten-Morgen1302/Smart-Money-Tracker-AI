@@ -11,28 +11,27 @@ type SidebarItemProps = {
 const SidebarItem = ({ href, icon, label, isActive }: SidebarItemProps) => {
   return (
     <li>
-      <Link href={href}>
-        <a
-          className={cn(
-            "flex items-center justify-center lg:justify-start p-2 lg:p-3 rounded-lg transition-all",
-            isActive
-              ? "text-white bg-cyan-400/20 group"
-              : "text-gray-400 hover:text-white hover:bg-white/5 group"
-          )}
-        >
-          <i className={cn(
-            icon, 
-            "text-xl lg:mr-3",
-            isActive 
-              ? "text-cyan-400" 
-              : "group-hover:text-purple-500"
-          )}></i>
-          <span className="hidden lg:block font-medium">{label}</span>
-          {isActive && (
-            <span className="hidden lg:block ml-auto h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          )}
-        </a>
-      </Link>
+      <div 
+        className={cn(
+          "flex items-center justify-center lg:justify-start p-2 lg:p-3 rounded-lg transition-all cursor-pointer",
+          isActive
+            ? "text-white bg-cyan-400/20 group"
+            : "text-gray-400 hover:text-white hover:bg-white/5 group"
+        )}
+        onClick={() => window.location.href = href}
+      >
+        <i className={cn(
+          icon, 
+          "text-xl lg:mr-3",
+          isActive 
+            ? "text-cyan-400" 
+            : "group-hover:text-purple-500"
+        )}></i>
+        <span className="hidden lg:block font-medium">{label}</span>
+        {isActive && (
+          <span className="hidden lg:block ml-auto h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+        )}
+      </div>
     </li>
   );
 };
