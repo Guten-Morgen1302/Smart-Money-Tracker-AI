@@ -1,0 +1,88 @@
+1. Set Up Your Project
+First, clone this agent-starter template repository to get a pre-configured project:
+
+Copy
+git clone https://github.com/openserv-labs/agent-starter.git
+cd agent-starter
+npm install
+2. Configure Your Environment
+Copy the example environment file and update it with your credentials:
+
+Copy
+cp .env.example .env
+Edit the .env file to add:
+
+OPENSERV_API_KEY: Your OpenServ API key (required for platform integration)
+
+OPENAI_API_KEY: Your OpenAI API key (optional, for local testing)
+
+PORT: The port for your agent's server (default: 7378)
+
+3. Understand the Project Structure
+The agent-starter project has a minimal structure:
+
+Copy
+agent-starter/
+├── src/
+│   └── index.ts       # Your agent's core logic and server setup
+├── .env               # Environment variables
+├── package.json       # Project dependencies
+└── tsconfig.json      # TypeScript configuration
+This simple structure keeps everything in one file, making it easy to understand and modify.
+
+Understanding the Agent Code
+Let's examine the src/index.ts file to understand how an agent is defined with the SDK and how this works:
+
+Key Components of the Agent
+Agent Creation:
+
+Copy
+const agent = new Agent({
+  systemPrompt: 'You are an agent that sums two numbers'
+})
+This creates a new agent with a system prompt that guides its behavior.
+
+Adding Capabilities:
+
+Copy
+agent.addCapability({
+  name: 'sum',
+  description: 'Sums two numbers',
+  schema: z.object({
+    a: z.number(),
+    b: z.number()
+  }),
+  async run({ args }) {
+    return `${args.a} + ${args.b} = ${args.a + args.b}`
+  }
+})
+This defines a capability named sum that:
+
+Provides a description for the platform to understand when to use it
+
+Uses Zod schema for type safety and validation
+
+Implements the logic in the run function
+
+Starting the Server:
+
+Copy
+agent.start()
+This launches an HTTP server that handles requests from the OpenServ platform.
+
+Local Testing with process():
+
+Copy
+async function main() {
+  const sum = await agent.process({
+    messages: [
+      {
+        role: 'user',
+        content: 'add 13 and 29'
+      }
+    ]
+  })
+
+  console.log('Sum:', sum.choices[0].message.content)
+}
+This demonstrates how to test your agent locally without deploying it to the platform.
