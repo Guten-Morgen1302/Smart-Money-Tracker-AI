@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-
+ 
 type AIInsight = {
   id: number;
   title: string;
