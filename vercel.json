@@ -1,19 +1,19 @@
-
 {
+  "version": 2,
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://localhost:5000/api/:path*"
+      "destination": "/api/:path*"
     },
     {
       "source": "/(.*)",
       "destination": "/"
     }
   ],
-  "functions": {
-    "api/**": {
-      "memory": 1024,
-      "maxDuration": 10
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
     }
-  }
+  ]
 }
