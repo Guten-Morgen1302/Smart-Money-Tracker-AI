@@ -1,7 +1,7 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatAddress, getColorForType } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query"; 
 import { useState, useEffect } from "react";
 import WalletMiniChart from "@/components/wallet-mini-chart";
 
