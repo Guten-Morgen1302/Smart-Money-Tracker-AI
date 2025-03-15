@@ -106,19 +106,34 @@ class Agent {
         }
       }
 
-      // If no capability matched, use OpenAI directly
+      // If no capability matched, try OpenAI with fallback
       if (this.openai) {
-        const response = await this.openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: this.systemPrompt },
-            ...messages
-          ]
-        });
+        try {
+          const response = await this.openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+              { role: "system", content: this.systemPrompt },
+              ...messages
+            ]
+          });
 
-        return {
-          choices: response.choices
-        };
+          return {
+            choices: response.choices
+          };
+        } catch (error: any) {
+          // Handle quota errors by falling back to local capabilities
+          if (error?.error?.type === 'insufficient_quota') {
+            return {
+              choices: [{
+                message: {
+                  role: 'assistant',
+                  content: "I can help you with:\n- Market trends\n- Wallet information\n- Transaction history\n- AI insights\n\nPlease ask about one of these topics!"
+                }
+              }]
+            };
+          }
+          throw error;
+        }
       }
 
       // Fallback if OpenAI call fails
