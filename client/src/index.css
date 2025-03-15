@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors */
+    --background: 232 29% 8%;
+    --foreground: 0 0% 100%;
+    
+    /* Card colors */
+    --card: 230 28% 13%;
+    --card-foreground: 0 0% 100%;
+    
+    /* Popover colors */
+    --popover: 230 28% 13%;
+    --popover-foreground: 0 0% 100%;
+    
+    /* Primary colors - cyberpunk blue */
+    --primary: 188 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    
+    /* Secondary colors - cyberpunk purple */
+    --secondary: 288 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Muted colors */
+    --muted: 223 27% 18%;
+    --muted-foreground: 218 11% 65%;
+    
+    /* Accent colors */
+    --accent: 223 27% 18%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Destructive colors - cyberpunk pink */
+    --destructive: 336 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Border, input, and ring colors */
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 188 100% 50%;
+    
+    /* Chart colors */
+    --chart-1: 188 100% 50%;  /* Cyberpunk blue */
+    --chart-2: 288 100% 50%;  /* Cyberpunk purple */
+    --chart-3: 113 100% 54%;  /* Cyberpunk green */
+    --chart-4: 336 100% 50%;  /* Cyberpunk pink */
+    --chart-5: 60 100% 50%;   /* Cyberpunk yellow */
+    
+    /* Sidebar colors */
+    --sidebar-background: 230 28% 13%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 188 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 223 27% 18%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 27.9% 16.9%;
+    --sidebar-ring: 188 100% 50%;
+    
+    /* Size/Radius */
+    --radius: 0.5rem;
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-inter antialiased bg-background text-foreground;
+  }
+  
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  .font-inter {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Gradient text */
+  .cybr-text-gradient {
+    @apply bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent;
+  }
+  
+  /* Circuit pattern backgrounds */
+  .circuit-pattern {
+    background-image: radial-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px),
+                      radial-gradient(rgba(189, 0, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    opacity: 0.05;
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+  }
+  
+  /* Scanline effect */
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .scanline::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    background: rgba(0, 229, 255, 0.1);
+    animation: scanline 3s linear infinite;
+    z-index: 1;
+  }
+  
+  @keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+  }
+  
+  /* Glow effect */
+  .glow-border {
+    position: relative;
+  }
+  
+  .glow-border::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--chart-3)));
+    z-index: -1;
+    opacity: 0.7;
+    filter: blur(8px);
+    transition: opacity 0.3s;
+  }
+  
+  .glow-border:hover::before {
+    opacity: 1;
+  }
+  
+  /* Glass morphism */
+  .glass-effect {
+    background: rgba(13, 14, 25, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Data pulse animation */
+  .data-pulse {
+    transform-origin: center;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(0, 229, 255, 0.5), 0 0 10px rgba(0, 229, 255, 0.4); }
+    100% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.8), 0 0 20px rgba(0, 229, 255, 0.6); }
+  }
+  
+  .animate-glow {
+    animation: glow 1.5s ease-in-out infinite alternate;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--secondary)));
+    border-radius: 3px;
+  }
+}
