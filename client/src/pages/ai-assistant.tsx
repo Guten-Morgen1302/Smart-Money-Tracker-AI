@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiRequest } from '@/lib/api';
+import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,32 +22,32 @@ export default function AIAssistant() {
       timestamp: new Date()
     }
   ]);
-
+  
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  
   // Auto-scroll to bottom of messages
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!query.trim()) return;
-
+    
     // Add user message to chat
     const userMessage: Message = {
       role: 'user',
       content: query,
       timestamp: new Date()
     };
-
+    
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
-
+    
     try {
       // Send query to AI agent API
       const response = await fetch('/api/ai/query', {
@@ -57,7 +57,7 @@ export default function AIAssistant() {
           'Content-Type': 'application/json'
         }
       });
-
+      
       if (!response.ok) {
         throw new Error(`Server responded with ${response.status}`);
       }
@@ -69,7 +69,7 @@ export default function AIAssistant() {
       } catch (e) {
         throw new Error('Invalid JSON response from server');
       }
-
+      
       // Add AI response to chat
       if (data && data.choices && data.choices[0]) {
         const aiMessage: Message = {
@@ -91,7 +91,7 @@ export default function AIAssistant() {
         description: error.message || "Failed to get response from AI agent",
         variant: "destructive"
       });
-
+      
       // Add error message to chat
       const errorMessage: Message = {
         role: 'assistant',
@@ -104,16 +104,16 @@ export default function AIAssistant() {
       setQuery('');
     }
   };
-
+  
   // Format timestamp
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
+  
   return (
     <div className="pt-16 pb-4 px-4 h-screen flex flex-col">
       <Header title="AI" highlight="Assistant" />
-
+      
       <div className="flex-1 overflow-hidden flex flex-col mb-4">
         <div className="mb-4">
           <Button 
@@ -125,7 +125,7 @@ export default function AIAssistant() {
             Back to Dashboard
           </Button>
         </div>
-
+        
         <Card className="flex-1 bg-[#0A0A12] border-white/5 flex flex-col overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -138,7 +138,7 @@ export default function AIAssistant() {
               Ask questions about crypto markets, wallets, and transactions
             </CardDescription>
           </CardHeader>
-
+          
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             <div className="space-y-4">
               {messages.map((message, index) => (
@@ -165,7 +165,7 @@ export default function AIAssistant() {
               <div ref={messagesEndRef} />
             </div>
           </CardContent>
-
+          
           <CardFooter className="border-t border-white/5 p-4">
             <form onSubmit={handleSubmit} className="w-full flex gap-2">
               <Input
@@ -196,7 +196,7 @@ export default function AIAssistant() {
           </CardFooter>
         </Card>
       </div>
-
+      
       <div className="text-center text-xs text-gray-500 mt-2">
         <p>AI powered by OpenServ SDK | Responses are generated in real-time based on available data</p>
       </div>
