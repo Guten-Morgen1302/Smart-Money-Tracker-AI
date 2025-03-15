@@ -2,7 +2,7 @@ import { users, type User, type InsertUser, wallets, type Wallet, type InsertWal
 import { generateActivityData } from "@/lib/utils";
 
 // Interface for storage methods
-export interface IStorage {
+export interface IStorage { 
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
