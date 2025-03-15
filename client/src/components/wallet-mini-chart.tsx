@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
-
+ 
 type WalletMiniChartProps = {
   data: number[];
   walletType: string;
