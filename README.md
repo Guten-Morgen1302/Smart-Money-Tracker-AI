@@ -8,27 +8,27 @@ Smart Money Tracker AI is a **real-time cryptocurrency intelligence platform** t
 
 ## 📊 Key Features  
 
-### 🖥️ Dashboard (`/`)  
+### 🖥️ Dashboard 
 - **Real-time market trends & AI insights**  
 - **Live whale activity tracking** with top wallet rankings  
 - **Instant updates on cryptocurrency metrics**  
 
-### 🐋 Whale Tracker (`/whale-tracker`)  
+### 🐋 Whale Tracker 
 - **Monitors large crypto transactions in real time**  
 - **Customizable filters for wallets, tokens, and transaction sizes**  
 - **AI-powered risk scoring for suspicious activities**  
 
-### 📈 AI Trends (`/ai-trends`)  
+### 📈 AI Trends  
 - **AI-powered market sentiment analysis** (Twitter/X, Telegram, Forums)  
 - **Whale behavior tracking & trend detection**  
 - **Prediction confidence: 89% accuracy**  
 
-### 👤 Wallet Insights (`/wallet-insights`)  
+### 👤 Wallet Insights 
 - **Detailed analysis of wallet activity & risk scoring**  
 - **Behavioral pattern detection for whale movements**  
 - **Balance tracking with monthly trend insights**  
 
-### 🤖 AI Assistant (`/ai-assistant`)  
+### 🤖 AI Assistant   
 - **Interactive chat interface for real-time market queries**  
 - **Instant insights on transactions, wallets, and trends**  
 - **Failsafe AI fallback when OpenAI API is unavailable**  
