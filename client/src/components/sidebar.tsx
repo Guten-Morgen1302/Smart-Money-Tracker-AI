@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 type SidebarItemProps = {
   href: string;
-  icon: string;
+  icon: string; 
   label: string;
   isActive?: boolean;
 };
