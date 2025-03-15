@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
+import { useToast } from '@/hooks/use-toast';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -11,7 +12,7 @@ type Message = {
   timestamp: Date;
 };
 
-export function AIAssistant() {
+export default function AIAssistant() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -48,9 +49,10 @@ export function AIAssistant() {
     setIsLoading(true);
     
     try {
-      // Use GET method instead of POST
-      const response = await fetch(`/api/ai/query?query=${encodeURIComponent(query)}`, {
-        method: 'GET', // Change POST to GET
+      // Send query to AI agent API
+      const response = await fetch('/api/ai/query', {
+        method: 'POST',
+        body: JSON.stringify({ query }),
         headers: {
           'Content-Type': 'application/json'
         }
@@ -107,7 +109,7 @@ export function AIAssistant() {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
+  
   return (
     <div className="pt-16 pb-4 px-4 h-screen flex flex-col">
       <Header title="AI" highlight="Assistant" />
