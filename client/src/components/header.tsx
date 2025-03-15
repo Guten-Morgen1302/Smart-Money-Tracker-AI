@@ -23,7 +23,7 @@ export default function Header({ title, highlight }: HeaderProps) {
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { toast } = useToast();
-  
+
   // Sample notifications
   const notifications = [
     {
@@ -48,40 +48,40 @@ export default function Header({ title, highlight }: HeaderProps) {
       read: true
     }
   ];
-  
+
   const [customWalletAddress, setCustomWalletAddress] = useState("");
-  
+
   // Validate cryptocurrency addresses
   const detectWalletType = (address: string): WalletDetectionResult => {
     // Ethereum-based address (ETH, ERC-20 tokens, etc.)
     if (/^0x[a-fA-F0-9]{40}$/i.test(address)) {
       return { isValid: true, walletType: "Ethereum" };
     }
-    
+
     // Bitcoin address (improved validation)
     if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$|^(bc1)[a-zA-HJ-NP-Z0-9]{39,59}$/i.test(address)) {
       return { isValid: true, walletType: "Bitcoin" };
     }
-    
+
     // Litecoin address
     if (/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/i.test(address)) {
       return { isValid: true, walletType: "Litecoin" };
     }
-    
+
     // Cardano address
     if (/^addr1[a-zA-Z0-9]{98}$|^DdzFF[a-zA-Z0-9]{94}$/i.test(address)) {
       return { isValid: true, walletType: "Cardano" };
     }
-    
+
     // Solana address
     if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/i.test(address) || /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{32,44}$/i.test(address)) {
       return { isValid: true, walletType: "Solana" };
     }
-    
+
     // Invalid address
     return { isValid: false, walletType: "Unknown" };
   };
-  
+
   const connectWallet = () => {
     if (!customWalletAddress) {
       toast({
@@ -91,10 +91,10 @@ export default function Header({ title, highlight }: HeaderProps) {
       });
       return;
     }
-    
+
     // Validate wallet address format
     const detectionResult = detectWalletType(customWalletAddress);
-    
+
     if (!detectionResult.isValid) {
       toast({
         title: "Invalid Wallet Address",
@@ -103,21 +103,21 @@ export default function Header({ title, highlight }: HeaderProps) {
       });
       return;
     }
-    
+
     // Save the detected wallet type
     setConnectedWalletType(detectionResult.walletType);
     setIsConnecting(true);
-    
+
     // Simulate wallet connection
     setTimeout(() => {
       // Format the address for display (first 6 chars + ... + last 4 chars)
       const formattedAddress = `${customWalletAddress.substring(0, 6)}...${customWalletAddress.substring(customWalletAddress.length - 4)}`;
-        
+
       setWalletAddress(formattedAddress);
       setWalletConnected(true);
       setIsConnecting(false);
       setShowConnectDialog(false);
-      
+
       toast({
         title: `${detectionResult.walletType} Wallet Connected`,
         description: `Successfully connected to ${detectionResult.walletType} wallet ${formattedAddress}`,
@@ -125,19 +125,19 @@ export default function Header({ title, highlight }: HeaderProps) {
       });
     }, 1500);
   };
-  
+
   const disconnectWallet = () => {
     setWalletConnected(false);
     setWalletAddress("");
     setConnectedWalletType("");
-    
+
     toast({
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected",
       variant: "default"
     });
   };
-  
+
   return (
     <header className="fixed top-0 right-0 left-16 lg:left-64 z-10 h-16 glass-effect border-b border-white/5 px-4 flex items-center justify-between">
       <div>
@@ -145,7 +145,7 @@ export default function Header({ title, highlight }: HeaderProps) {
           {title} {highlight && <span className="text-cyan-400">{highlight}</span>}
         </h2>
       </div>
-      
+
       <div className="flex items-center space-x-4">
         {/* Search */}
         <div className="hidden md:block relative">
@@ -156,7 +156,7 @@ export default function Header({ title, highlight }: HeaderProps) {
           />
           <i className="ri-search-line absolute left-3 top-2.5 text-gray-400"></i>
         </div>
-        
+
         {/* Notifications */}
         <div className="relative">
           <button 
@@ -166,7 +166,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             <i className="ri-notification-3-line text-xl"></i>
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-pink-500"></span>
           </button>
-          
+
           {/* Notifications Panel */}
           {notificationsOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-[#191A2A] border border-white/10 rounded-lg shadow-lg p-2 z-50">
@@ -199,7 +199,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             </div>
           )}
         </div>
-        
+
         {/* Connect Wallet Button */}
         {walletConnected ? (
           <Button 
@@ -223,8 +223,11 @@ export default function Header({ title, highlight }: HeaderProps) {
             <span>Connect Wallet</span>
           </Button>
         )}
+          {/* Added username display */}
+          <span className="text-white">{localStorage.getItem('username') || 'Guest'}</span>
+
       </div>
-      
+
       {/* Connect Wallet Dialog */}
       <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
         <DialogContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
@@ -234,7 +237,7 @@ export default function Header({ title, highlight }: HeaderProps) {
               Enter your wallet address to connect and track your assets
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="py-4">
             <div className="flex flex-col space-y-4">
               {/* Supported wallet types */}
@@ -246,28 +249,28 @@ export default function Header({ title, highlight }: HeaderProps) {
                   </div>
                   <span className="text-xs mt-1">ETH</span>
                 </div>
-                
+
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-orange-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-orange-400/20 flex items-center justify-center">
                     <i className="ri-coin-line text-lg text-orange-400"></i>
                   </div>
                   <span className="text-xs mt-1">BTC</span>
                 </div>
-                
+
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-purple-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-purple-400/20 flex items-center justify-center">
                     <i className="ri-coins-line text-lg text-purple-400"></i>
                   </div>
                   <span className="text-xs mt-1">ADA</span>
                 </div>
-                
+
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-blue-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
                     <i className="ri-bit-coin-line text-lg text-blue-400"></i>
                   </div>
                   <span className="text-xs mt-1">LTC</span>
                 </div>
-                
+
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg border border-green-400/20 bg-[#0A0A10]/70">
                   <div className="w-8 h-8 rounded-full bg-green-400/20 flex items-center justify-center">
                     <i className="ri-money-dollar-circle-line text-lg text-green-400"></i>
@@ -275,7 +278,7 @@ export default function Header({ title, highlight }: HeaderProps) {
                   <span className="text-xs mt-1">SOL</span>
                 </div>
               </div>
-              
+
               <div className="mt-4">
                 <label className="text-sm text-gray-300 mb-2 block">Wallet Address</label>
                 <Input 
@@ -290,7 +293,7 @@ export default function Header({ title, highlight }: HeaderProps) {
                   We'll automatically detect the wallet type from your address
                 </p>
               </div>
-              
+
               <div className="bg-[#0A0A10] rounded-lg p-3 border border-white/5">
                 <h4 className="text-sm font-medium text-gray-300 mb-1">Supported Wallet Types:</h4>
                 <ul className="text-xs text-gray-400 space-y-1">
@@ -303,7 +306,7 @@ export default function Header({ title, highlight }: HeaderProps) {
               </div>
             </div>
           </div>
-          
+
           <DialogFooter>
             {isConnecting ? (
               <Button disabled className="bg-gradient-to-r from-cyan-400 to-purple-500 text-white">
