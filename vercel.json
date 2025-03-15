@@ -7,7 +7,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/index.html",
+      "src": "client/dist/public/*",
       "use": "@vercel/static"
     }
   ],
@@ -18,7 +18,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/index.html"
+      "dest": "/client/dist/public/index.html"
     }
   ],
   "rewrites": [
