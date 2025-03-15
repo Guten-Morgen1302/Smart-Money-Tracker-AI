@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 type StatCardProps = {
-  title: string;
+  title: string; 
   value: string;
   label: string;
   labelValue: string;
