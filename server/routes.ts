@@ -185,9 +185,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Alerts routes
-  app.get("/api/alerts", isAuthenticated, async (req: any, res) => {
+  app.get("/api/alerts", async (req, res) => {
     try {
-      const userId = req.user.id;
+      // For demo, get alerts for userId 1
+      const userId = 1;
       const alerts = await storage.getAlertsByUserId(userId);
       res.json(alerts);
     } catch (err) {
@@ -195,9 +196,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/alerts", isAuthenticated, async (req: any, res) => {
+  app.post("/api/alerts", async (req, res) => {
     try {
-      const userId = req.user.id;
+      // For demo, set userId to 1
+      const userId = 1;
       const alertData = insertAlertSchema.parse({
         ...req.body,
         userId
@@ -210,19 +212,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.patch("/api/alerts/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/alerts/:id", async (req, res) => {
     try {
       const alertId = parseInt(req.params.id);
-      const userId = req.user.id;
       
-      // Check if alert exists and belongs to user
+      // Check if alert exists
       const alert = await storage.getAlertById(alertId);
       if (!alert) {
         return res.status(404).json({ message: "Alert not found" });
-      }
-      
-      if (alert.userId !== userId) {
-        return res.status(403).json({ message: "Unauthorized" });
       }
       
       // Update alert
@@ -233,19 +230,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/alerts/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/alerts/:id", async (req, res) => {
     try {
       const alertId = parseInt(req.params.id);
-      const userId = req.user.id;
       
-      // Check if alert exists and belongs to user
+      // Check if alert exists
       const alert = await storage.getAlertById(alertId);
       if (!alert) {
         return res.status(404).json({ message: "Alert not found" });
-      }
-      
-      if (alert.userId !== userId) {
-        return res.status(403).json({ message: "Unauthorized" });
       }
       
       // Delete alert

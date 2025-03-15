@@ -42,19 +42,42 @@ export default function Header({ title, highlight }: HeaderProps) {
     }
   ];
   
+  const [selectedWalletType, setSelectedWalletType] = useState<string | null>(null);
+  const [customWalletAddress, setCustomWalletAddress] = useState("");
+  const [showAddressDialog, setShowAddressDialog] = useState(false);
+  
+  const initiateWalletConnection = (walletType: string) => {
+    setSelectedWalletType(walletType);
+    setShowAddressDialog(true);
+  };
+  
   const connectWallet = () => {
+    if (!customWalletAddress) {
+      toast({
+        title: "Input Required",
+        description: "Please enter a wallet address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsConnecting(true);
     // Simulate wallet connection
     setTimeout(() => {
-      const randomAddress = "0x" + Math.random().toString(16).substring(2, 10) + "..." + Math.random().toString(16).substring(2, 6);
-      setWalletAddress(randomAddress);
+      // Format the address for display (first 6 chars + ... + last 4 chars)
+      const formattedAddress = customWalletAddress.length > 10 
+        ? `${customWalletAddress.substring(0, 6)}...${customWalletAddress.substring(customWalletAddress.length - 4)}`
+        : customWalletAddress;
+        
+      setWalletAddress(formattedAddress);
       setWalletConnected(true);
       setIsConnecting(false);
+      setShowAddressDialog(false);
       setShowConnectDialog(false);
       
       toast({
         title: "Wallet Connected",
-        description: `Successfully connected to ${randomAddress}`,
+        description: `Successfully connected to ${formattedAddress}`,
         variant: "default"
       });
     }, 1500);
@@ -166,7 +189,7 @@ export default function Header({ title, highlight }: HeaderProps) {
           <div className="grid grid-cols-2 gap-4 py-4">
             <div
               className="flex flex-col items-center justify-center p-4 rounded-lg border border-cyan-400/20 hover:border-cyan-400/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={connectWallet}
+              onClick={() => initiateWalletConnection("MetaMask")}
             >
               <div className="w-12 h-12 rounded-full bg-cyan-400/20 flex items-center justify-center mb-2">
                 <i className="ri-firefox-line text-2xl text-cyan-400"></i>
@@ -176,7 +199,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             
             <div
               className="flex flex-col items-center justify-center p-4 rounded-lg border border-purple-500/20 hover:border-purple-500/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={connectWallet}
+              onClick={() => initiateWalletConnection("Coinbase")}
             >
               <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
                 <i className="ri-compass-3-line text-2xl text-purple-500"></i>
@@ -186,7 +209,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             
             <div
               className="flex flex-col items-center justify-center p-4 rounded-lg border border-pink-500/20 hover:border-pink-500/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={connectWallet}
+              onClick={() => initiateWalletConnection("WalletConnect")}
             >
               <div className="w-12 h-12 rounded-full bg-pink-500/20 flex items-center justify-center mb-2">
                 <i className="ri-treasure-map-line text-2xl text-pink-500"></i>
@@ -196,7 +219,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             
             <div
               className="flex flex-col items-center justify-center p-4 rounded-lg border border-green-400/20 hover:border-green-400/60 bg-[#0A0A10]/70 hover:bg-[#0A0A10] transition-all cursor-pointer"
-              onClick={connectWallet}
+              onClick={() => initiateWalletConnection("Trust Wallet")}
             >
               <div className="w-12 h-12 rounded-full bg-green-400/20 flex items-center justify-center mb-2">
                 <i className="ri-bit-coin-line text-2xl text-green-400"></i>
@@ -219,6 +242,61 @@ export default function Header({ title, highlight }: HeaderProps) {
               >
                 Cancel
               </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Wallet Address Dialog */}
+      <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
+        <DialogContent className="bg-[#191A2A] border border-cyan-400/20 text-white">
+          <DialogHeader>
+            <DialogTitle>{selectedWalletType} Wallet</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Enter your wallet address to connect and track your assets
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <label className="text-sm text-gray-300 mb-2 block">Wallet Address</label>
+            <Input 
+              type="text" 
+              placeholder="Enter wallet address (0x...)" 
+              className="bg-[#0A0A10] border border-cyan-400/30 rounded-lg py-2 px-4 w-full text-white focus:outline-none focus:border-cyan-400/80 text-sm transition-all"
+              value={customWalletAddress}
+              onChange={(e) => setCustomWalletAddress(e.target.value)}
+            />
+            <p className="text-xs text-cyan-400/70 mt-2">
+              <i className="ri-information-line mr-1"></i>
+              Your wallet address will be used to track your assets and provide personalized insights
+            </p>
+          </div>
+          
+          <DialogFooter>
+            {isConnecting ? (
+              <Button disabled className="bg-gradient-to-r from-cyan-400 to-purple-500 text-white">
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></div>
+                Connecting...
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowAddressDialog(false);
+                    setCustomWalletAddress("");
+                  }}
+                  className="border-cyan-400/30 text-white hover:bg-white/5 mr-2"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-gradient-to-r from-cyan-400 to-purple-500 text-white"
+                  onClick={connectWallet}
+                >
+                  Connect
+                </Button>
+              </>
             )}
           </DialogFooter>
         </DialogContent>
