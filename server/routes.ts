@@ -250,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // AI Agent endpoint
-  app.post("/api/ai/query", async (req, res) => {
+  app.post("/api/ai/query", express.json(), async (req, res) => {
     try {
       const { query } = req.body;
       
