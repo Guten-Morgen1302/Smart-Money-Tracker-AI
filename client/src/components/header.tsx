@@ -54,27 +54,27 @@ export default function Header({ title, highlight }: HeaderProps) {
   // Validate cryptocurrency addresses
   const detectWalletType = (address: string): WalletDetectionResult => {
     // Ethereum-based address (ETH, ERC-20 tokens, etc.)
-    if (/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    if (/^0x[a-fA-F0-9]{40}$/i.test(address)) {
       return { isValid: true, walletType: "Ethereum" };
     }
     
-    // Bitcoin address (simplified validation)
-    if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/.test(address)) {
+    // Bitcoin address (improved validation)
+    if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$|^(bc1)[a-zA-HJ-NP-Z0-9]{39,59}$/i.test(address)) {
       return { isValid: true, walletType: "Bitcoin" };
     }
     
-    // Litecoin address (simplified validation)
-    if (/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(address)) {
+    // Litecoin address
+    if (/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/i.test(address)) {
       return { isValid: true, walletType: "Litecoin" };
     }
     
-    // Cardano address (simplified validation)
-    if (/^addr1[a-zA-Z0-9]{98}$/.test(address)) {
+    // Cardano address
+    if (/^addr1[a-zA-Z0-9]{98}$|^DdzFF[a-zA-Z0-9]{94}$/i.test(address)) {
       return { isValid: true, walletType: "Cardano" };
     }
     
     // Solana address
-    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/i.test(address) || /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{32,44}$/i.test(address)) {
       return { isValid: true, walletType: "Solana" };
     }
     
