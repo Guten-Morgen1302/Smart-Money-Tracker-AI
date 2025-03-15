@@ -74,6 +74,12 @@ export default function Sidebar() {
               isActive={location === "/ai-trends"} 
             />
             <SidebarItem 
+              href="/ai-assistant" 
+              icon="ri-robot-line" 
+              label="AI Assistant" 
+              isActive={location === "/ai-assistant"} 
+            />
+            <SidebarItem 
               href="/wallet-insights" 
               icon="ri-wallet-3-line" 
               label="Wallet Insights" 

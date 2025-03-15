@@ -50,7 +50,7 @@ export default function AIAssistant() {
     
     try {
       // Send query to AI agent API
-      const response = await apiRequest('/api/ai/query', {
+      const response = await fetch('/api/ai/query', {
         method: 'POST',
         body: JSON.stringify({ query }),
         headers: {
@@ -58,11 +58,13 @@ export default function AIAssistant() {
         }
       });
       
+      const data = await response.json();
+      
       // Add AI response to chat
-      if (response && response.choices && response.choices[0]) {
+      if (data && data.choices && data.choices[0]) {
         const aiMessage: Message = {
           role: 'assistant',
-          content: response.choices[0].message.content,
+          content: data.choices[0].message.content,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, aiMessage]);

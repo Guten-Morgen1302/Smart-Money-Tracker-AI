@@ -22,6 +22,7 @@ function Router() {
       <Route path="/ai-trends" component={AITrends} />
       <Route path="/wallet-insights" component={WalletInsights} />
       <Route path="/alerts" component={Alerts} />
+      <Route path="/ai-assistant" component={AIAssistant} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
