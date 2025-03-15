@@ -9,9 +9,16 @@ type HeaderProps = {
   highlight?: string;
 };
 
+// Type for the wallet detection result
+type WalletDetectionResult = {
+  isValid: boolean;
+  walletType: string;
+};
+
 export default function Header({ title, highlight }: HeaderProps) {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
+  const [connectedWalletType, setConnectedWalletType] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -51,10 +58,35 @@ export default function Header({ title, highlight }: HeaderProps) {
     setShowAddressDialog(true);
   };
   
-  // Validate Ethereum address
-  const isValidEthereumAddress = (address: string): boolean => {
-    // Basic Ethereum address validation: 0x followed by exactly 40 hex characters
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  // Validate cryptocurrency addresses
+  const detectWalletType = (address: string): WalletDetectionResult => {
+    // Ethereum-based address (ETH, ERC-20 tokens, etc.)
+    if (/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      return { isValid: true, walletType: "Ethereum" };
+    }
+    
+    // Bitcoin address (simplified validation)
+    if (/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$/.test(address)) {
+      return { isValid: true, walletType: "Bitcoin" };
+    }
+    
+    // Litecoin address (simplified validation)
+    if (/^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/.test(address)) {
+      return { isValid: true, walletType: "Litecoin" };
+    }
+    
+    // Cardano address (simplified validation)
+    if (/^addr1[a-zA-Z0-9]{98}$/.test(address)) {
+      return { isValid: true, walletType: "Cardano" };
+    }
+    
+    // Solana address
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
+      return { isValid: true, walletType: "Solana" };
+    }
+    
+    // Invalid address
+    return { isValid: false, walletType: "Unknown" };
   };
   
   const connectWallet = () => {
@@ -68,16 +100,21 @@ export default function Header({ title, highlight }: HeaderProps) {
     }
     
     // Validate wallet address format
-    if (!isValidEthereumAddress(customWalletAddress)) {
+    const detectionResult = detectWalletType(customWalletAddress);
+    
+    if (!detectionResult.isValid) {
       toast({
         title: "Invalid Wallet Address",
-        description: "Please enter a valid Ethereum address (0x followed by 40 characters)",
+        description: "Please enter a valid cryptocurrency wallet address",
         variant: "destructive"
       });
       return;
     }
     
+    // Save the detected wallet type
+    setConnectedWalletType(detectionResult.walletType);
     setIsConnecting(true);
+    
     // Simulate wallet connection
     setTimeout(() => {
       // Format the address for display (first 6 chars + ... + last 4 chars)
@@ -90,8 +127,8 @@ export default function Header({ title, highlight }: HeaderProps) {
       setShowConnectDialog(false);
       
       toast({
-        title: "Wallet Connected",
-        description: `Successfully connected to ${formattedAddress}`,
+        title: `${detectionResult.walletType} Wallet Connected`,
+        description: `Successfully connected to ${detectionResult.walletType} wallet ${formattedAddress}`,
         variant: "default"
       });
     }, 1500);
@@ -100,6 +137,7 @@ export default function Header({ title, highlight }: HeaderProps) {
   const disconnectWallet = () => {
     setWalletConnected(false);
     setWalletAddress("");
+    setConnectedWalletType("");
     
     toast({
       title: "Wallet Disconnected",
@@ -176,7 +214,12 @@ export default function Header({ title, highlight }: HeaderProps) {
             className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-green-400 to-cyan-500 text-white"
             onClick={() => disconnectWallet()}
           >
-            <i className="ri-wallet-3-line mr-2"></i>
+            {connectedWalletType === "Bitcoin" && <i className="ri-bitcoin-line mr-2"></i>}
+            {connectedWalletType === "Ethereum" && <i className="ri-ethereum-line mr-2"></i>}
+            {connectedWalletType === "Litecoin" && <i className="ri-copper-coin-line mr-2"></i>}
+            {connectedWalletType === "Solana" && <i className="ri-sun-line mr-2"></i>}
+            {connectedWalletType === "Cardano" && <i className="ri-sailing-boat-line mr-2"></i>}
+            {(connectedWalletType === "Unknown" || !connectedWalletType) && <i className="ri-wallet-3-line mr-2"></i>}
             <span className="font-mono text-sm">{walletAddress}</span>
           </Button>
         ) : (
@@ -275,7 +318,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             <label className="text-sm text-gray-300 mb-2 block">Wallet Address</label>
             <Input 
               type="text" 
-              placeholder="Enter wallet address (0x...)" 
+              placeholder="Enter any cryptocurrency wallet address" 
               className="bg-[#0A0A10] border border-cyan-400/30 rounded-lg py-2 px-4 w-full text-white focus:outline-none focus:border-cyan-400/80 text-sm transition-all"
               value={customWalletAddress}
               onChange={(e) => setCustomWalletAddress(e.target.value)}
