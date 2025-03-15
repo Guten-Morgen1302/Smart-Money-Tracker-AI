@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Chart from "chart.js/auto";
-
+ 
 export default function MarketTrendChart() {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const [chartInstance, setChartInstance] = useState<Chart | null>(null);
