@@ -223,8 +223,7 @@ export default function Header({ title, highlight }: HeaderProps) {
             <span>Connect Wallet</span>
           </Button>
         )}
-          {/* Added username display */}
-          <span className="text-white">{localStorage.getItem('username') || 'Guest'}</span>
+          
 
       </div>
 
