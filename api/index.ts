@@ -8,15 +8,15 @@ const app = express();
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Create HTTP server and register routes
-const server = await registerRoutes(app);
+// Register routes
+registerRoutes(app);
 
-// Export handler for Vercel
-export default function handler(req, res) {
-  return app(req, res);
+// Export serverless handler
+export default async function handler(req, res) {
+  app(req, res);
 }
