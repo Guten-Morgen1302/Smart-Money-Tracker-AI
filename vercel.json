@@ -5,5 +5,11 @@
   "outputDirectory": "dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" }
-  ]
+  ],
+  "functions": {
+    "api/index": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
 }
