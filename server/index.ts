@@ -1,5 +1,6 @@
+
 import express from "express";
-import cors from "cors"; 
+import cors from "cors";
 import { registerRoutes } from "./routes";
 
 const app = express();
@@ -8,15 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files
-app.use(express.static("dist/public"));
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static("dist/public"));
+}
 
 // Register API routes
 registerRoutes(app);
 
-
+// Development server
 if (process.env.NODE_ENV !== 'production') {
-  // Development server
   app.listen(5000, '0.0.0.0', () => {
     console.log('[express] serving on port 5000');
   });
