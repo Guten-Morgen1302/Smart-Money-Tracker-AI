@@ -16,10 +16,19 @@ app.use(express.json());
 // Register routes
 registerRoutes(app);
 
-// Export handler for Vercel
+// Export handler for Vercel serverless function
 export default function handler(req, res) {
+  // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     return res.status(200).end();
   }
-  return app(req, res);
+  
+  // Handle the actual request
+  return new Promise((resolve, reject) => {
+    app(req, res);
+    res.on('finish', resolve);
+    res.on('error', reject);
+  });
 }
