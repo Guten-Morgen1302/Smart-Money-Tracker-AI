@@ -11,17 +11,23 @@ class Agent {
 
   constructor({ systemPrompt }: { systemPrompt: string }) {
     this.systemPrompt = systemPrompt;
-    this.openservApiKey = process.env.OPENSERV_API_KEY;
+    this.openservApiKey = process.env.OPENSERV_API_KEY || '';
 
     // Initialize OpenAI if API key is available
-    if (process.env.OPENAI_API_KEY) {
-      this.openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-      });
-    }
+    const apiKey = process.env.OPENAI_API_KEY || '';
+    this.openai = new OpenAI({
+      apiKey
+    });
 
-    if (!this.openservApiKey) {
-      console.warn('OpenServ API key not found. Some agent capabilities may be limited.');
+    if (!apiKey || !this.openservApiKey) {
+      console.warn('API keys not found. Using fallback capabilities.');
+      return {
+        choices: [{
+          message: {
+            content: "I'm here to help! What would you like to know about crypto markets and transactions?"
+          }
+        }]
+      };
     }
   }
 
