@@ -7,7 +7,7 @@ const app = express();
 
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
@@ -16,7 +16,10 @@ app.use(express.json());
 // Register routes
 registerRoutes(app);
 
-// Export serverless handler
-export default async function handler(req, res) {
-  app(req, res);
+// Export handler for Vercel
+export default function handler(req, res) {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  return app(req, res);
 }
