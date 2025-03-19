@@ -1,4 +1,4 @@
-#🏆 Competition Submission (OpenServ AI Hackathon)
+# 🏆 Competition Submission (OpenServ AI Hackathon)
 
 # 🚀 Smart Money Tracker AI  
 **AI-Powered Crypto Analytics Platform**  
